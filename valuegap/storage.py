@@ -21,7 +21,8 @@ DEFAULT_DB = "valuegap.db"
 
 
 def connect(db_path: str = DEFAULT_DB) -> sqlite3.Connection:
-    conn = sqlite3.connect(db_path)
+    # Streamlit may run successive reruns of one session on different threads.
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     # SQLite leaves foreign keys off unless asked, per connection.
     conn.execute("PRAGMA foreign_keys = ON")

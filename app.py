@@ -52,6 +52,14 @@ SAMPLE_PILOT = APP_DIR / "data" / "sample_pilot.json"
 SAMPLE_CSV = APP_DIR / "data" / "sample_monthly.csv"
 DB_PATH = Path(os.environ.get("VALUEGAP_DB", APP_DIR / "valuegap.db"))
 
+# On a shared public host every visitor would see every saved pilot, so there
+# each browser session gets its own in-memory history instead. Streamlit
+# Community Cloud serves apps from /mount/src/; VALUEGAP_PUBLIC_DEMO forces it.
+PUBLIC_DEMO = (
+    os.environ.get("VALUEGAP_PUBLIC_DEMO", "").lower() in ("1", "true", "yes")
+    or str(APP_DIR).startswith("/mount/src/")
+)
+
 NEW_PILOT = "➕ New pilot"
 BLANK_PILOT = {
     "name": "",
@@ -88,7 +96,17 @@ conn = None
 if use_sample:
     sp = json.loads(SAMPLE_PILOT.read_text())
 else:
-    conn = connect(str(DB_PATH))
+    if PUBLIC_DEMO:
+        if "demo_db" not in st.session_state:
+            st.session_state.demo_db = connect(":memory:")
+        conn = st.session_state.demo_db
+        st.caption(
+            "Public demo: pilots you enter are kept only in this browser session, "
+            "are not visible to anyone else, and are gone when you close the tab. "
+            "Don't enter confidential figures."
+        )
+    else:
+        conn = connect(str(DB_PATH))
     choice = st.selectbox("Pilot", [NEW_PILOT] + list_pilots(conn))
     stored = get_pilot(conn, choice) if choice != NEW_PILOT else None
     sp = vars(stored) if stored else BLANK_PILOT

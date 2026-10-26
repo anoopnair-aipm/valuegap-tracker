@@ -37,6 +37,23 @@ def test_history_mode_reads_months_from_sqlite(at, tmp_path):
     assert any("Value leaks as of 2026-04" in s.value for s in at.subheader)
 
 
+def test_public_demo_keeps_each_session_private(monkeypatch, tmp_path):
+    from valuegap.storage import connect, load_pilot_json, save_pilot
+
+    data = Path(APP).parent / "data"
+    # A pilot saved to the on-disk database must not leak into a public session.
+    save_pilot(connect(str(tmp_path / "shared.db")), load_pilot_json(data / "sample_pilot.json"))
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setenv("VALUEGAP_DB", str(tmp_path / "shared.db"))
+    monkeypatch.setenv("VALUEGAP_PUBLIC_DEMO", "true")
+
+    at = AppTest.from_file(APP, default_timeout=60).run()
+    at.toggle[0].set_value(False).run()
+    assert not at.exception
+    assert at.selectbox[0].options == ["➕ New pilot"]
+    assert any("only in this browser session" in c.value for c in at.caption)
+
+
 def test_sample_dashboard_renders(at):
     at.run()
     assert not at.exception
