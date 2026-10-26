@@ -1,0 +1,15 @@
+# ValueGap Tracker — dependency-light by design.
+# Everything runs locally; only the OPTIONAL narrator polish calls the Claude API.
+#
+# Standard library only: sqlite3, json, csv, argparse, html (no install needed).
+
+# Streamlit dashboard (Sunday half of the build).
+streamlit>=1.37
+
+# OPTIONAL narrator polish. The tool produces a complete, correct executive
+# summary with no API key set; anthropic is only used to smooth the prose when
+# ANTHROPIC_API_KEY is present. Safe to omit if you never want the polish layer.
+anthropic>=0.39
+
+# Tests.
+pytest>=8.0

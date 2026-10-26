@@ -1,0 +1,37 @@
+# Generated executive summaries (sample outputs are reproducible)
+reports/*.html
+
+# SQLite database
+*.db
+*.sqlite3
+valuegap.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Secrets — never commit an API key
+.env
+
+# Private planning docs (kept local, not part of the open-source repo)
+valuegap-tracker-build-spec-*.pdf

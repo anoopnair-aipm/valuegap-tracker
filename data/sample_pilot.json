@@ -1,0 +1,11 @@
+{
+  "name": "Drafting assistant",
+  "start_month": "2026-01",
+  "implementation_cost": 20000,
+  "value_per_hour": 60,
+  "promised_hours_saved": 200,
+  "promised_successful_outcomes": 400,
+  "promised_success_rate": 0.90,
+  "promised_ai_cost_budget": 1200,
+  "_note": "Illustrative sample only. These numbers are not a claim about any real pilot. value_per_hour and the promised targets are user-entered assumptions, not benchmarks. promised_ai_cost_budget / promised_successful_outcomes gives the cost-per-outcome target ($3.00 here)."
+}
