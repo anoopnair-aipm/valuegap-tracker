@@ -5,6 +5,9 @@ not pay back. ValueGap Tracker makes that gap visible — it tracks whether a
 pilot delivered the value it *promised*, month by month, in plain executive
 language, instead of leaving it to a slide deck.
 
+**Try the live demo: https://valuegap-tracker.streamlit.app** (sample data,
+illustrative only; anything you enter stays in your own browser session).
+
 You define one pilot once, add one row of actuals per month, and the tool tells
 you: how much of the promise was realized, what each successful outcome costs,
 whether the pilot has paid back its build cost yet, and *where the value is
