@@ -13,14 +13,14 @@ you: how much of the promise was realized, what each successful outcome costs,
 whether the pilot has paid back its build cost yet, and *where the value is
 leaking* — with one concrete fix for each leak.
 
-This is the fourth piece of a four-repo story:
+This is one piece of a four-repo story:
 
 | Repo | What it proves |
 | --- | --- |
-| `frugal-claude` | you can **control** AI cost |
-| `local-rag-system` | you can **build** AI |
-| `ProdGate AI` | you know what it takes to **ship** AI safely |
-| **`valuegap-tracker`** | you can **prove whether it delivered value** after launch |
+| [`frugal-claude`](https://github.com/anoopnair-aipm/frugal-claude) | you can **control** AI cost |
+| [`local-rag-system`](https://github.com/anoopnair-aipm/local-rag-system) | you can **build** AI |
+| ProdGate AI *(planned, not yet published)* | you know what it takes to **ship** AI safely |
+| **`valuegap-tracker`** (this repo) | you can **prove whether it delivered value** after launch |
 
 ---
 
@@ -42,8 +42,9 @@ five numbers a leader can read in thirty seconds:
 
 ### The demo arc (the shipped sample)
 
-The sample pilot, **"Drafting assistant"**, is built to tell the story
-hiring managers remember:
+The sample pilot, **"Drafting assistant"**, is built to show one complete arc:
+a pilot that falls short of its promise because people aren't using it, then
+recovers once that leak is fixed:
 
 - **Month 1** starts *below promise* — only 36% of eligible users are active, so
   most of the promised hours can't be saved. Adoption is the biggest leak.
