@@ -59,33 +59,124 @@ hiring managers remember:
 
 ---
 
-## Quick start
+## How to use it, step by step
 
-```bash
-pip install -r requirements.txt
+### Step 1: Open the app
+
+Pick one:
+
+- **No install:** open the live demo at **https://valuegap-tracker.streamlit.app**.
+  Anything you enter there stays in your own browser session and is gone when
+  you close the tab, so use it to try the tool, not to keep real records.
+- **On your own computer** (keeps your history between sessions). You need
+  Python 3.10 or newer:
+
+  ```bash
+  git clone https://github.com/anoopnair-aipm/valuegap-tracker.git
+  cd valuegap-tracker
+  python3 -m venv .venv
+  source .venv/bin/activate        # Windows: .venv\Scripts\activate
+  pip install -r requirements.txt
+  streamlit run app.py
+  ```
+
+  Your browser opens the dashboard at `http://localhost:8501`. Next time, you
+  only need the `cd`, `source`, and `streamlit run app.py` lines.
+
+### Step 2: Explore the sample
+
+The app opens with **"Use the shipped sample pilot"** switched on. It loads an
+illustrative pilot, "Drafting assistant", with six months of made-up data.
+Scroll to **3. Dashboard** to see what a finished report looks like: 83%
+realization, $2.12 per successful outcome, $32,460 net value, payback in
+2026-04, and adoption turning from Red to Green.
+
+### Step 3: Define your pilot (once)
+
+Switch the sample **off**, leave **Pilot** on "New pilot", and fill in what was
+promised. (A red "name is missing" note shows until you type a pilot name;
+that's expected.)
+
+| Field | What to enter |
+| --- | --- |
+| Pilot name | A generic name, e.g. "Support reply assistant" |
+| Start month | The first month of the pilot, as `YYYY-MM` |
+| One-time implementation cost ($) | What it cost to build and launch |
+| Value per hour saved ($) | Your assumption for what an hour of saved time is worth |
+| Promised hours saved / month | The time savings the pilot was approved on |
+| Promised successful outcomes / month | How many good results it should produce |
+| Promised success rate (0–1) | The quality bar, e.g. `0.90`; this becomes the quality leak's Green line |
+| Promised AI cost budget / month ($) | Expected monthly AI spend |
+
+Click **Save pilot**. The app shows the cost-per-outcome target it derives
+(budget ÷ promised successful outcomes).
+
+### Step 4: Prepare a monthly CSV
+
+In Excel or Google Sheets, make one row per month with exactly these column
+headers, then save it as CSV (Excel: *File → Save As → CSV UTF-8*; Google
+Sheets: *File → Download → .csv*):
+
+| Column | Meaning |
+| --- | --- |
+| `month` | The month, as `YYYY-MM` |
+| `hours_saved` | Hours saved that month, as verified by the pilot owner (before rework) |
+| `successful_outcomes` | Outcomes that met the quality bar |
+| `total_outcomes` | All outcomes attempted |
+| `ai_cost` | AI spend that month, in dollars |
+| `rework_hours` | Hours spent fixing the AI's output |
+| `active_users` | People who actually used it that month |
+| `eligible_users` | People who could have used it |
+
+Example (the first sample month):
+
+```csv
+month,hours_saved,successful_outcomes,total_outcomes,ai_cost,rework_hours,active_users,eligible_users
+2026-01,80,175,190,500,15,18,50
 ```
 
-**Command line** (fully offline, no API key needed):
+### Step 5: Import it
+
+In **2. Import monthly actuals**, upload the CSV and click **Import**. If the
+file has a problem (a blank cell, more successes than outcomes, a month before
+the pilot started, a month listed twice), nothing is imported and the app lists
+each problem by row, so you can fix the file and try again.
+
+### Step 6: Read the dashboard
+
+| You see | What it tells you |
+| --- | --- |
+| **Realization rate** | How much of the promised hours were actually saved |
+| **Cost / successful outcome** | What each good result cost, against your target |
+| **Cumulative net value** | Value of hours saved, minus AI cost, rework, and build cost, so far |
+| **Payback** | The month the pilot paid back its build cost, "not yet", or reached-then-lost |
+| **Charts and monthly table** | Promised vs. realized hours and net value, month by month |
+| **Value leaks** | Adoption, quality, and cost, scored on the latest month, worst first, each with one fix and its trend since month 1 |
+| **Executive summary** | The same story in plain language; any missing months are listed as data notes |
+
+### Step 7: Add each new month
+
+Next month, choose your pilot in the **Pilot** list, upload a CSV with just the
+new month's row, and click **Import**. The dashboard updates using the whole
+history. Re-importing a month replaces it, so you can correct earlier numbers.
+
+### Step 8: Share the result
+
+Click **Download HTML executive summary** for a one-page report you can email
+or attach to a steering-committee deck.
+
+### Prefer the command line?
+
+Everything above also works offline, with no API key, from the terminal:
 
 ```bash
 python -m valuegap.check --pilot data/sample_pilot.json --actuals data/sample_monthly.csv
 ```
 
-Add `--html reports/sample.html` to also write the HTML executive summary.
-Add `--db valuegap.db` to keep the pilot's history in SQLite: each later run
-only needs that month's CSV row, and the report covers every stored month.
-
-**Dashboard:**
-
-```bash
-streamlit run app.py
-```
-
-Keep the sample toggle on for the demo, or turn it off to work with your own
-pilot: define it once (saved to the local `valuegap.db`), import one month's CSV
-at a time, and read the dashboard: promised vs. realized hours by month,
-realization rate, cost per successful outcome, cumulative net value, the
-monthly table, and the executive summary with its leak check.
+Add `--html reports/summary.html` to also write the HTML summary, and
+`--db valuegap.db` to keep the pilot's history so each later run only needs that
+month's CSV row. Use [`data/sample_pilot.json`](data/sample_pilot.json) as the
+template for your own pilot file.
 
 ### Input checks
 
@@ -96,6 +187,29 @@ successes than outcomes, more active than eligible users, months not in
 formats are accepted: `$1,200`, header case and spacing, Excel's UTF-8 CSV
 export, and `2026-9` (read as `2026-09`). Missing months are flagged as a data
 note in the summary.
+
+---
+
+## Tech stack
+
+Deliberately small: the engine is plain Python, and every dependency has one job.
+
+| Layer | Technology | What it does here |
+| --- | --- | --- |
+| Language | **Python 3.10+** | Everything. The live demo runs on 3.12. |
+| Dashboard | **[Streamlit](https://streamlit.io)** | The web UI: pilot form, CSV upload, metrics, charts, monthly table, HTML download |
+| Calculation engine | Python standard library | Every formula, leak rule, and threshold, in [`valuegap/calculations.py`](valuegap/calculations.py) and [`valuegap/leaks.py`](valuegap/leaks.py) |
+| Input validation | Python standard library (`csv`, `json`, `re`) | Row-level checks on the pilot definition and monthly CSV ([`valuegap/validation.py`](valuegap/validation.py)) |
+| Storage | **SQLite** (`sqlite3`, built into Python) | Keeps each pilot and its monthly history on your machine (`valuegap.db`). On the public demo, history lives in memory, per browser session. |
+| Reports | Python standard library (`html`) | The plain-text and one-page HTML executive summaries ([`valuegap/report.py`](valuegap/report.py)) |
+| Command line | Python standard library (`argparse`) | `python -m valuegap.check` for scripted, offline runs |
+| Optional narration | **[Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python)** + Claude (`claude-opus-5-5`) | Turns the finished summary into one paragraph of prose. Never writes a number; off unless you set an API key. |
+| Tests | **pytest** + Streamlit's `AppTest` | 97 tests, including the dashboard run headlessly |
+| Hosting | **[Streamlit Community Cloud](https://streamlit.io/cloud)** | Serves the live demo straight from this repo's `main` branch |
+
+Nothing leaves your machine unless you turn on the optional narrator, which
+sends the finished summary (the pilot name, calculated figures, and leak
+checks, never your raw CSV) to the Claude API.
 
 ---
 
@@ -214,12 +328,6 @@ valuegap-tracker/
 - Thresholds and the value-per-hour figure are **user-entered starting
   defaults**, clearly labeled as assumptions.
 - The sample pilot is illustrative only.
-
-## Tech
-
-Python standard library (`sqlite3`, `csv`, `json`, `argparse`, `html`) +
-`streamlit` for the UI + `anthropic` for the optional narrator. Everything runs
-locally except the optional Claude narration calls.
 
 ## License
 
